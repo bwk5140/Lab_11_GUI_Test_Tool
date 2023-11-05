@@ -107,7 +107,7 @@ public class GUI_Coverage_Tool extends javax.swing.JFrame {
 
         jToolBar1.setRollover(true);
 
-        jLabel1.setIcon(new javax.swing.ImageIcon("C:\\Users\\brian\\Documents\\Fall 2023\\SWENG 431\\add folder.png")); // NOI18N
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/lab/pkg11/gui/test/tool/resources/add folder.png"))); // NOI18N
         jLabel1.setToolTipText("Open Folder");
         jLabel1.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 4, 1, 4));
         jLabel1.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -117,7 +117,7 @@ public class GUI_Coverage_Tool extends javax.swing.JFrame {
         });
         jToolBar1.add(jLabel1);
 
-        jLabel2.setIcon(new javax.swing.ImageIcon("C:\\Users\\brian\\Documents\\Fall 2023\\SWENG 431\\remove folder.png")); // NOI18N
+        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/lab/pkg11/gui/test/tool/resources/remove folder.png"))); // NOI18N
         jLabel2.setToolTipText("Remove Selection");
         jLabel2.setAlignmentX(0.5F);
         jLabel2.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 4, 1, 4));
@@ -128,7 +128,7 @@ public class GUI_Coverage_Tool extends javax.swing.JFrame {
         });
         jToolBar1.add(jLabel2);
 
-        jLabel4.setIcon(new javax.swing.ImageIcon("C:\\Users\\brian\\Documents\\Fall 2023\\SWENG 431\\manual.png")); // NOI18N
+        jLabel4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/lab/pkg11/gui/test/tool/resources/manual.png"))); // NOI18N
         jLabel4.setToolTipText("Help");
         jLabel4.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 4, 1, 4));
         jLabel4.addMouseListener(new java.awt.event.MouseAdapter() {
