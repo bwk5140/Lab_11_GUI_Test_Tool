@@ -46,7 +46,8 @@ public class GUI_Coverage_Tool extends javax.swing.JFrame {
     Object[] obj = null;
     int numOfRuns = 0;
     Class[] cls1;
-    private JViewport rowHeader = new JViewport();
+    private final JViewport rowHeader = new JViewport();
+    FileNameExtensionFilter filter= new FileNameExtensionFilter("Class File", "class");
 
     /**
      * Creates new form GUI_Coverage_Tool
@@ -129,9 +130,6 @@ public class GUI_Coverage_Tool extends javax.swing.JFrame {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabel2MouseClicked(evt);
             }
-            public void mousePressed(java.awt.event.MouseEvent evt) {
-                jLabel2MousePressed(evt);
-            }
         });
         jToolBar1.add(jLabel2);
 
@@ -207,108 +205,26 @@ public class GUI_Coverage_Tool extends javax.swing.JFrame {
 
     private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
         // TODO add your handling code here:
-            FileNameExtensionFilter filter = new FileNameExtensionFilter("Class File", "class");
-        jfc = new JFileChooser("C://Users//brian//Documents//FALL 2023//SWENG 431");
-        jfc.setFileSelectionMode(2);
-        jfc.setMultiSelectionEnabled(true);
-        jfc.setFileFilter(filter);
-        //try
-        //{
-        if (jfc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION)
-        {
-            
-            files = jfc.getSelectedFiles();
-            
-            if (files[0].isDirectory())
-            {
-                files = getMatchingFiles(files[0], "class");
-            }
-            
-            fileName = new String[files.length];
-            parentFileName = new String[files.length];
-            grandParentFileName = new String[files.length];
-            classes = new Class[files.length];
+        this.getJfc();
 
-            int i = 0;
-            for(File f : files)
-            {
-                fileName[i] = f.getName().split("\\.")[0];
-                parentFileName[i] = f.getParentFile().getName();
-                grandParentFileName[i] = f.getParentFile().getParentFile().getName();
-                
-                int index = 1;
-                while (classes[i] == null)
-                {
-                    try
-                    {
-                        classes[i] = FileChooser.chooser(url, files[i], classes[i], ucl, fileName[i],
-                                parentFileName[i], grandParentFileName[i], index);
-                    }
-                    catch (MalformedURLException | ClassNotFoundException e)
-                    {
-                        System.out.println(e.getMessage());
-                    }
-                    index++;
-                }
+        this.variablesInitializer();
 
-                i++;
-            }
-            this.jList1.setListData(fileName);
-            this.jList2.setListData(new String[0]);
-        }
+        this.directoryParser(1);
+        this.jList1.setListData(fileName);
+        this.jList2.setListData(new String[0]);
     }//GEN-LAST:event_jMenuItem2ActionPerformed
 
     private void jLabel1MouseClicked(java.awt.event.MouseEvent evt)
     {//GEN-FIRST:event_jLabel1MouseClicked
         // TODO add your handling code here:
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("Class File", "class");
-        jfc = new JFileChooser("C://Users//brian//Documents//FALL 2023//SWENG 431");
-        jfc.setFileSelectionMode(2);
-        jfc.setMultiSelectionEnabled(true);
-        jfc.setFileFilter(filter);
-        //try
-        //{
-        if (jfc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION)
-        {
-            
-            files = jfc.getSelectedFiles();
-            
-            if (files[0].isDirectory())
-            {
-                files = getMatchingFiles(files[0], "class");
-            }
-            
-            fileName = new String[files.length];
-            parentFileName = new String[files.length];
-            grandParentFileName = new String[files.length];
-            classes = new Class[files.length];
+        this.getJfc();
 
-            int i = 0;
-            for(File f : files)
-            {
-                fileName[i] = f.getName().split("\\.")[0];
-                parentFileName[i] = f.getParentFile().getName();
-                grandParentFileName[i] = f.getParentFile().getParentFile().getName();
-                
-                int index = 0;
-                while (classes[i] == null)
-                {
-                    try
-                    {
-                        classes[i] = FileChooser.chooser(url, files[i], classes[i], ucl, fileName[i],
-                                parentFileName[i], grandParentFileName[i], index);
-                    }
-                    catch (MalformedURLException | ClassNotFoundException e)
-                    {
-                        System.out.println(e.getMessage());
-                    }
-                }
+        this.variablesInitializer();
 
-                i++;
-            }
-            this.jList1.setListData(fileName);
-            this.jList2.setListData(new String[0]);
-        }
+        this.directoryParser(0);
+
+        this.jList1.setListData(fileName);
+        this.jList2.setListData(new String[0]);
     }//GEN-LAST:event_jLabel1MouseClicked
 
     private void jLabel4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel4MouseClicked
@@ -453,21 +369,16 @@ public class GUI_Coverage_Tool extends javax.swing.JFrame {
         this.obj1 = null;
         this.methods = null;
         this.fileName = null;
+        this.jfc = null;
+        this.parentFileName = null;
+        this.grandParentFileName = null;
+        this.constructors = null;
+        this.url = null;
+        this.ucl = null;
         this.classes = null;
         this.jList1.setListData(new String[0]);
         this.jList2.setListData(new String[0]);
     }//GEN-LAST:event_jLabel2MouseClicked
-
-    private void jLabel2MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel2MousePressed
-        // TODO add your handling code here:
-        this.obj = null;
-        this.obj1 = null;
-        this.methods = null;
-        this.fileName = null;
-        this.classes = null;
-        this.jList1.setListData(new String[0]);
-        this.jList2.setListData(new String[0]);
-    }//GEN-LAST:event_jLabel2MousePressed
 
     private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
         // TODO add your handling code here:
@@ -475,6 +386,12 @@ public class GUI_Coverage_Tool extends javax.swing.JFrame {
         this.obj1 = null;
         this.methods = null;
         this.fileName = null;
+        this.jfc = null;
+        this.parentFileName = null;
+        this.grandParentFileName = null;
+        this.constructors = null;
+        this.url = null;
+        this.ucl = null;
         this.classes = null;
         this.jList1.setListData(new String[0]);
         this.jList2.setListData(new String[0]);
@@ -576,5 +493,92 @@ public class GUI_Coverage_Tool extends javax.swing.JFrame {
         });
 
         return files;
+    }
+    public static Class chooser(File f, Class c, String str1,
+                                String str2, String str3, int index) throws MalformedURLException, ClassNotFoundException
+    {
+        while (c == null)
+        {
+            URL url;
+            URLClassLoader ucl;
+            if (index == 0)
+            {
+                url = f.getParentFile().toURI().toURL();
+                URL[] urla = {url};
+                ucl = new URLClassLoader(urla);
+                c = Class.forName(str1, true, ucl);
+            }
+            if (index == 1)
+            {
+                url = f.getParentFile().getParentFile().toURI().toURL();
+                URL[] urla = {url};
+                ucl = new URLClassLoader(urla);
+                c = Class.forName(str2 + "." + str1, true, ucl);
+            }
+            if (index == 2)
+            {
+                url = f.getParentFile().getParentFile().getParentFile().toURI().toURL();
+                URL[] urla = {url};
+                ucl = new URLClassLoader(urla);
+                c = Class.forName(str3 + "." + str2 + "." + str1, true, ucl);
+            }
+            index++;
+        }
+        return c;
+    }
+
+    public void getJfc()
+    {
+        if (jfc == null)
+        {
+            jfc = new JFileChooser("C://Users//brian//Documents//FALL 2023//SWENG 431");
+            jfc.setFileSelectionMode(2);
+            jfc.setMultiSelectionEnabled(true);
+            jfc.setFileFilter(filter);
+        }
+
+        if (jfc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION)
+        {
+            files = jfc.getSelectedFiles();
+        }
+
+        if (files[0].isDirectory())
+        {
+            files = getMatchingFiles(files[0], "class");
+        }
+    }
+
+    public void variablesInitializer()
+    {
+        if (fileName == null)
+            fileName = new String[files.length];
+        if (parentFileName == null)
+            parentFileName = new String[files.length];
+        if (grandParentFileName == null)
+            grandParentFileName = new String[files.length];
+        if (classes == null)
+            classes = new Class[files.length];
+    }
+
+    public void directoryParser(int index)
+    {
+        int i = 0;
+        for (File f : files)
+        {
+            fileName[i] = f.getName().split("\\.")[0];
+            parentFileName[i] = f.getParentFile().getName();
+            grandParentFileName[i] = f.getParentFile().getParentFile().getName();
+
+            try
+            {
+                classes[i] = chooser(files[i], classes[i], fileName[i],
+                        parentFileName[i], grandParentFileName[i], index);
+            } catch (MalformedURLException | ClassNotFoundException e)
+            {
+                System.out.println(e.getMessage());
+            }
+
+            i++;
+        }
     }
 }
