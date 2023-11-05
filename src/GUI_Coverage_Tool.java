@@ -225,7 +225,7 @@ public class GUI_Coverage_Tool extends javax.swing.JFrame {
     private void jLabel4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel4MouseClicked
         try {
             // TODO add your handling code here:
-            Scanner inFs = new Scanner(new File("C:/Users/brian/Documents/Fall 2023/SWENG 431/Lab 11 Help.txt"));
+            Scanner inFs = new Scanner(new File("C:\\Users\\brian\\Documents\\Fall 2023\\SWENG 431\\Lab 11 GUI Test Tool\\src\\Lab 11 Help.txt"));
             help = inFs.nextLine() + "\n";
             while(inFs.hasNextLine())
             {

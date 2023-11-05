@@ -1,0 +1,15 @@
+This coverage tool allows the user to load in all Java classes within a specified folder.
+The tool lists all class files inside the directory.
+The GUI contains a split pane, as shown below.
+The left hand side of the split pane displays all of the found classes.
+The right hand side shows the declared methods and constructors of a user selected class in the list.
+The right side of the split pane contains a scroll pane.
+This scroll pane has a vertical view port to display the number of executions that have occurred to individual methods.
+The number for each method in each class is default to be zero initially, shown on the vertical view port.
+
+***Tool Tips***
+-Click "Remove Selection" to start a new method run to ensure the best accuracy of results. Further updates will invalidate the need for this.
+-Open a file/folder either using the "File">>"Open Folder" or by clicking on the "Open Folder" icon. If a file was not found using either method. Future updates should find the file. Otherwise, try both methods if the file was not found with the first method.
+-Once the classes have been loaded, click on a specific class to load the methods.
+-To run the methods, you will need to create an object by clicking on any one of the listed constructors.
+-Once an object has been created, run the methods as you like and observe the system output for the results.
