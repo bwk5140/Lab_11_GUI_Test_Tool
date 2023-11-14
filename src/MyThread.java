@@ -142,9 +142,6 @@ public class MyThread extends Thread {
         }
     }
 
-    private void jbInit() throws Exception {
-    }
-
     private boolean methodEntryEvent(Event event) {
         MethodEntryEvent me = (MethodEntryEvent)event;
         System.out.println("MethodEntryEvent");

@@ -42,8 +42,6 @@ public class GUI_Coverage_Tool extends javax.swing.JFrame {
     Constructor[] constructors;
     String[] parentFileName;
     String[] grandParentFileName;
-    Object obj1 = new Object();
-    Object[] obj = null;
     JTextArea jColHeader = new JTextArea();
     JTextArea jTextArea2 = new JTextArea();
     MyThread mt;
@@ -314,8 +312,6 @@ public class GUI_Coverage_Tool extends javax.swing.JFrame {
 
     private void jLabel2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel2MouseClicked
         // TODO add your handling code here:
-        this.obj = null;
-        this.obj1 = null;
         this.methods = null;
         this.fileName = null;
         this.parentFileName = null;
@@ -325,13 +321,14 @@ public class GUI_Coverage_Tool extends javax.swing.JFrame {
         this.ucl = null;
         this.classes = null;
         this.jList1.setListData(new String[0]);
-        this.jList2.setListData(new String[0]);
+        this.jTextArea2.setText("");
+        this.jColHeader.setText("     ");
+        this.mt = null;
+        this.vm = null;
     }//GEN-LAST:event_jLabel2MouseClicked
 
     private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
         // TODO add your handling code here:
-        this.obj = null;
-        this.obj1 = null;
         this.methods = null;
         this.fileName = null;
         this.parentFileName = null;
@@ -341,26 +338,40 @@ public class GUI_Coverage_Tool extends javax.swing.JFrame {
         this.ucl = null;
         this.classes = null;
         this.jList1.setListData(new String[0]);
-        this.jList2.setListData(new String[0]);
+        this.jTextArea2.setText("");
+        this.jColHeader.setText("     ");
+        this.mt = null;
+        this.vm = null;
     }//GEN-LAST:event_jMenuItem3ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        LaunchingConnector lc = Bootstrap.virtualMachineManager().defaultConnector();
-        Map map = lc.defaultArguments();
-        Connector.Argument ca = (Connector.Argument)map.get("main");
         int idx = this.jList1.getSelectedIndex();
-        try {
-            int i = this.files[idx].getName().indexOf(".class");
-            String cName = this.dir.getName() + "." + this.files[idx].getName().substring(0, i);
-            ca.setValue("-cp \"" + this.dir.getParentFile() + "\" " + cName);
-            this.vm = lc.launch(map);
-            Process process = this.vm.process();
-            this.vm.setDebugTraceMode(0);
-            this.displayRemoteOutput(process.getInputStream());
-            this.mt = new MyThread(this.vm, false, this.dir.getName(), this.files.length, this);
-        } catch (Exception e) {
-            System.out.println(e);
+
+        if (idx >= 0)
+        {
+            LaunchingConnector lc = Bootstrap.virtualMachineManager().defaultConnector();
+            Map map = lc.defaultArguments();
+            Connector.Argument ca = (Connector.Argument) map.get("main");
+
+            try
+            {
+                int i = this.files[idx].getName().indexOf(".class");
+                String cName = this.dir.getName() + "." + this.files[idx].getName().substring(0, i);
+                ca.setValue("-cp \"" + this.dir.getParentFile() + "\" " + cName);
+                this.vm = lc.launch(map);
+                Process process = this.vm.process();
+                this.vm.setDebugTraceMode(0);
+                this.displayRemoteOutput(process.getInputStream());
+                this.mt = new MyThread(this.vm, false, this.dir.getName(), this.files.length, this);
+            } catch (Exception e)
+            {
+                System.out.println(e);
+            }
+        }
+        else if (this.classes[0] != null)
+        {
+            JOptionPane.showMessageDialog(null, "Select a .class file on the left and press \"Run\"");
         }
 
     }//GEN-LAST:event_jButton1ActionPerformed
