@@ -8,8 +8,7 @@ This scroll pane has a vertical view port to display the number of executions th
 The number for each method in each class is default to be zero initially, shown on the vertical view port.
 
 ***Tool Tips***
--Click "Remove Selection" to start a new method run to ensure the best accuracy of results. Further updates will invalidate the need for this.
--Open a file/folder either using the "File">>"Open Folder" or by clicking on the "Open Folder" icon. If a file was not found using either method. Future updates should find the file. Otherwise, try both methods if the file was not found with the first method.
--Once the classes have been loaded, click on a specific class to load the methods.
--To run the methods, you will need to create an object by clicking on any one of the listed constructors.
--Once an object has been created, run the methods as you like and observe the system output for the results.
+-Open a folder either using the menu item "File">>"Open Folder" or by clicking the "Open Folder" icon. If a file was not found using either method.
+-If you run into exceptions loading the classes, try using the "File" menu item instead of the icon.
+-If both methods did not work, that file cannot be opened with this tool at this time.
+-Once the classes have been loaded, click on a specific class and press "Run".
