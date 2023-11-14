@@ -8,7 +8,7 @@ This scroll pane has a vertical view port to display the number of executions th
 The number for each method in each class is default to be zero initially, shown on the vertical view port.
 
 ***Tool Tips***
--Open a folder either using the menu item "File">>"Open Folder" or by clicking the "Open Folder" icon. If a file was not found using either method.
+-Open a folder either using the menu item "File">>"Open Folder" or by clicking the "Open Folder" icon.
 -If you run into exceptions loading the classes, try using the "File" menu item instead of the icon.
 -If both methods did not work, that file cannot be opened with this tool at this time.
 -Once the classes have been loaded, click on a specific class and press "Run".
