@@ -1,20 +1,20 @@
+import com.sun.jdi.Bootstrap;
+import com.sun.jdi.VirtualMachine;
+import com.sun.jdi.connect.Connector;
+import com.sun.jdi.connect.LaunchingConnector;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Hashtable;
+import java.util.Map;
 import java.util.Scanner;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JTextArea;
-import javax.swing.JViewport;
+import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 /*
@@ -28,11 +28,15 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  */
 public class GUI_Coverage_Tool extends javax.swing.JFrame {
     String help;
-    JFileChooser jfc = null;
+    int returnVal;
+    JFileChooser jfc = new JFileChooser("C://Users//brian//Documents//FALL 2023//SWENG 431");
     File[] files = null;
+    File dir;
     String[] fileName;
     private URL url;
+    URL[] urls = new URL[1];
     private URLClassLoader ucl;
+    VirtualMachine vm;
     Class[] classes;
     Method[] methods;
     Constructor[] constructors;
@@ -40,10 +44,11 @@ public class GUI_Coverage_Tool extends javax.swing.JFrame {
     String[] grandParentFileName;
     Object obj1 = new Object();
     Object[] obj = null;
-    int numOfRuns = 0;
-    Class[] cls1;
-    private final JViewport rowHeader = new JViewport();
+    JTextArea jColHeader = new JTextArea();
+    JTextArea jTextArea2 = new JTextArea();
+    MyThread mt;
     FileNameExtensionFilter filter= new FileNameExtensionFilter("Class File", "class");
+    MyFileNameFilter myFileNameFilter = new MyFileNameFilter();
 
     /**
      * Creates new form GUI_Coverage_Tool
@@ -51,7 +56,6 @@ public class GUI_Coverage_Tool extends javax.swing.JFrame {
     public GUI_Coverage_Tool()
     {
         initComponents();
-        this.jScrollPane2.setRowHeader(rowHeader);
     }
 
     /**
@@ -65,12 +69,13 @@ public class GUI_Coverage_Tool extends javax.swing.JFrame {
         jMenuItem1 = new javax.swing.JMenuItem();
         panel1 = new java.awt.Panel();
         jScrollPane1 = new javax.swing.JScrollPane();
+        jSplitPane1 = new JSplitPane();
         jList1 = new javax.swing.JList<>();
         jToolBar1 = new javax.swing.JToolBar();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         jList2 = new javax.swing.JList<>();
         jMenuBar1 = new javax.swing.JMenuBar();
@@ -78,7 +83,8 @@ public class GUI_Coverage_Tool extends javax.swing.JFrame {
         jMenuItem2 = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         jMenuItem3 = new javax.swing.JMenuItem();
-
+        this.jColHeader.setText("     ");
+        this.jColHeader.setBackground(Color.GRAY);
         jMenuItem1.setText("jMenuItem1");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -104,6 +110,26 @@ public class GUI_Coverage_Tool extends javax.swing.JFrame {
                 .addGap(0, 0, 0)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 339, Short.MAX_VALUE))
         );
+        this.jSplitPane1.setOneTouchExpandable(true);
+        javax.swing.GroupLayout layout_ = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout_);
+        layout_.setHorizontalGroup(
+                layout_.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout_.createSequentialGroup()
+                                .addComponent(panel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGap(0, 0, 0)
+                                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 305, Short.MAX_VALUE))
+                        .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        layout_.setVerticalGroup(
+                layout_.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout_.createSequentialGroup()
+                                .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, 0)
+                                .addGroup(layout_.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(panel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(jSplitPane1)))
+        );
 
         jToolBar1.setRollover(true);
 
@@ -112,7 +138,13 @@ public class GUI_Coverage_Tool extends javax.swing.JFrame {
         jLabel1.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 4, 1, 4));
         jLabel1.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jLabel1MouseClicked(evt);
+                try
+                {
+                    jLabel1MouseClicked(evt);
+                } catch (MalformedURLException | ClassNotFoundException e)
+                {
+                    throw new RuntimeException(e);
+                }
             }
         });
         jToolBar1.add(jLabel1);
@@ -138,14 +170,16 @@ public class GUI_Coverage_Tool extends javax.swing.JFrame {
         });
         jToolBar1.add(jLabel4);
 
-        jLabel3.setText("Run");
-        jLabel3.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 4, 1, 4));
-        jLabel3.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jLabel3MouseClicked(evt);
+        jButton1.setText("Run");
+        jButton1.setFocusable(false);
+        jButton1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jButton1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
             }
         });
-        jToolBar1.add(jLabel3);
+        jToolBar1.add(jButton1);
 
         jScrollPane2.setViewportView(jList2);
 
@@ -154,7 +188,13 @@ public class GUI_Coverage_Tool extends javax.swing.JFrame {
         jMenuItem2.setText("Open Folder");
         jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem2ActionPerformed(evt);
+                try
+                {
+                    jMenuItem2ActionPerformed(evt);
+                } catch (MalformedURLException | ClassNotFoundException e)
+                {
+                    throw new RuntimeException(e);
+                }
             }
         });
         jMenu1.add(jMenuItem2);
@@ -194,32 +234,29 @@ public class GUI_Coverage_Tool extends javax.swing.JFrame {
                     .addComponent(panel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jScrollPane2)))
         );
+        this.jScrollPane2.getViewport().add(this.jTextArea2);
+        this.jScrollPane2.setRowHeaderView(this.jColHeader);
+        this.jScrollPane1.getViewport().add(this.jList1, (Object)null);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
+    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) throws MalformedURLException, ClassNotFoundException
+    {//GEN-FIRST:event_jMenuItem2ActionPerformed
         // TODO add your handling code here:
         this.getJfc();
 
-        this.variablesInitializer();
-
         this.directoryParser(1);
-        this.jList1.setListData(fileName);
-        this.jList2.setListData(new String[0]);
+
     }//GEN-LAST:event_jMenuItem2ActionPerformed
 
-    private void jLabel1MouseClicked(java.awt.event.MouseEvent evt)
+    private void jLabel1MouseClicked(java.awt.event.MouseEvent evt) throws MalformedURLException, ClassNotFoundException
     {//GEN-FIRST:event_jLabel1MouseClicked
         // TODO add your handling code here:
         this.getJfc();
 
-        this.variablesInitializer();
-
         this.directoryParser(0);
 
-        this.jList1.setListData(fileName);
-        this.jList2.setListData(new String[0]);
     }//GEN-LAST:event_jLabel1MouseClicked
 
     private void jLabel4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel4MouseClicked
@@ -229,7 +266,7 @@ public class GUI_Coverage_Tool extends javax.swing.JFrame {
             help = inFs.nextLine() + "\n";
             while(inFs.hasNextLine())
             {
-                help += inFs.nextLine() + "\n";     
+                help += inFs.nextLine() + "\n";
             }
         } catch (FileNotFoundException ex) {
             System.out.println(ex.getMessage());
@@ -247,116 +284,33 @@ public class GUI_Coverage_Tool extends javax.swing.JFrame {
         helpText.setLineWrap(true);
         helpFrame.setSize(650, 250);
         helpFrame.setVisible(true);
-        helpFrame.add(helpText);       
+        helpFrame.add(helpText);
     }//GEN-LAST:event_jLabel4MouseClicked
 
     private void jList1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jList1MouseClicked
         // TODO add your handling code here:
-            int index = this.jList1.getSelectedIndex();
-        
-        methods = classes[index].getDeclaredMethods();
-        constructors = classes[index].getConstructors();
-
-            int i;
-            Class[] cls;
-            int j;
-            int k = 0;
-            
-        String[] str = new String[this.constructors.length + this.methods.length];
-
-        for(i = 0; i < this.constructors.length; ++i) 
-        {
-            cls = this.constructors[i].getParameterTypes();
-            str[i] = this.constructors[i].getName() + "(";
-
-            for(j = 0; j < cls.length; ++j) 
-            {
-                if (j == cls.length - 1) 
-                {
-                    str[i] = str[i] + cls[j].getName();
-                } else 
-                {
-                    str[i] = str[i] + cls[j].getName() + ",";
-                }
-            }
-            k++;
-            str[i] = str[i] + ")";
-        }
-               
-        for(i = 0; i < this.methods.length; ++i) 
-        {
-            cls = this.methods[i].getParameterTypes();
-            str[i + k] = this.methods[i].getReturnType().getName() + " " + this.methods[i].getName() + "(";
-
-            for(j = 0; j < cls.length; ++j) 
-            {
-                if (j == cls.length - 1) 
-                {
-                    str[i + k] = str[i + k] + cls[j].getName();
-                } 
-                else 
-                {
-                    str[i + k] = str[i + k] + cls[j].getName() + ",";
-                }
-            }
-
-                str[i + k] = str[i + k] + ")";
-        }
-
-        this.jList2.setListData(str);
-    }//GEN-LAST:event_jList1MouseClicked
-
-    private void jLabel3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel3MouseClicked
-        // TODO add your handling code here:
-        int idx = this.jList2.getSelectedIndex();
         int index = this.jList1.getSelectedIndex();
-        
-        
-        if (idx >= this.constructors.length && obj == null)
+        try
         {
-            JOptionPane.showMessageDialog(this.jScrollPane2, 
-                    "Create an object first using any of the listed constructors");
-        }
-        if (idx < this.constructors.length)
-        {
-            cls1 = this.constructors[idx].getParameterTypes();
-            obj = this.class2object(cls1);
-
-            try 
+            ClassSkeleton cs = new ClassSkeleton(classes[index]);
+            String[] skelStringArr;
+            if (this.mt != null)
             {
-                this.obj1 = this.constructors[idx].newInstance(obj);
-            } 
-            catch (Exception ex) 
+                Hashtable ht = this.mt.getHashTable();
+                skelStringArr = cs.getSkeleton(ht);
+            } else
             {
-                System.out.println(ex + " \n****Could not create class****");
+                skelStringArr = cs.getSkeleton();
             }
-        }
-        
-        if (idx >= this.constructors.length && obj != null)
-        {
-            Class[] mtd = this.methods[idx - this.constructors.length].getParameterTypes();
-            obj = this.class2object(mtd);
 
-            try 
-            {
-                Object outcome = this.methods[idx - this.constructors.length].invoke(this.obj1, obj);
-                numOfRuns++;
-                if (outcome != null) 
-                {
-                    System.out.println(outcome.toString() + "\n");
-                }
-                else 
-                {
-                    System.out.println("null\n");
-                }
-            
-            } 
-            catch (Exception var6) 
-            {
-                System.out.println(var6 + " \n****Couldn't call method****");
-            }
+            this.jTextArea2.setText(skelStringArr[0]);
+            this.jColHeader.setText(skelStringArr[1] + "\n    ");
         }
-    }//GEN-LAST:event_jLabel3MouseClicked
+        catch (Exception ex)
+        {
+            throw(ex);
+        }
+    }//GEN-LAST:event_jList1MouseClicked
 
     private void jLabel2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel2MouseClicked
         // TODO add your handling code here:
@@ -364,7 +318,6 @@ public class GUI_Coverage_Tool extends javax.swing.JFrame {
         this.obj1 = null;
         this.methods = null;
         this.fileName = null;
-        this.jfc = null;
         this.parentFileName = null;
         this.grandParentFileName = null;
         this.constructors = null;
@@ -381,7 +334,6 @@ public class GUI_Coverage_Tool extends javax.swing.JFrame {
         this.obj1 = null;
         this.methods = null;
         this.fileName = null;
-        this.jfc = null;
         this.parentFileName = null;
         this.grandParentFileName = null;
         this.constructors = null;
@@ -392,47 +344,50 @@ public class GUI_Coverage_Tool extends javax.swing.JFrame {
         this.jList2.setListData(new String[0]);
     }//GEN-LAST:event_jMenuItem3ActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args)
-    {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        LaunchingConnector lc = Bootstrap.virtualMachineManager().defaultConnector();
+        Map map = lc.defaultArguments();
+        Connector.Argument ca = (Connector.Argument)map.get("main");
+        int idx = this.jList1.getSelectedIndex();
         try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
+            int i = this.files[idx].getName().indexOf(".class");
+            String cName = this.dir.getName() + "." + this.files[idx].getName().substring(0, i);
+            ca.setValue("-cp \"" + this.dir.getParentFile() + "\" " + cName);
+            this.vm = lc.launch(map);
+            Process process = this.vm.process();
+            this.vm.setDebugTraceMode(0);
+            this.displayRemoteOutput(process.getInputStream());
+            this.mt = new MyThread(this.vm, false, this.dir.getName(), this.files.length, this);
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void displayRemoteOutput(final InputStream stream) {
+        Thread thr = new Thread("output reader") {
+            public void run() {
+                BufferedReader in = new BufferedReader(new InputStreamReader(stream));
+                int i;
+                try {
+                    while ((i = in.read()) != -1) {
+                        System.out.print((char) i); // Print out standard output
+                    }
+                } catch (IOException ex) {
+                    System.out.println("Failed reading output");
                 }
             }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(GUI_Coverage_Tool.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(GUI_Coverage_Tool.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(GUI_Coverage_Tool.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(GUI_Coverage_Tool.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run()
-            {
-                new GUI_Coverage_Tool().setVisible(true);
-            }
-        });
+        };
+        thr.setPriority(Thread.MAX_PRIORITY - 1);
+        thr.start();
     }
 
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JList<String> jList1;
     private javax.swing.JList<String> jList2;
@@ -444,48 +399,16 @@ public class GUI_Coverage_Tool extends javax.swing.JFrame {
     private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JToolBar jToolBar1;
     private java.awt.Panel panel1;
     // End of variables declaration//GEN-END:variables
 
-    private Object[] class2object(Class[] cls) 
-    {
-        Object[] obj = new Object[cls.length];
-
-        for(int j = 0; j < cls.length; ++j) {
-            if (!cls[j].isPrimitive()) 
-            {
-                NewJDialog id2 = new NewJDialog(cls[j]);
-                id2.setVisible(true);
-                obj[j] = id2.getObject();
-            } else {
-                NewJDialog id1 = new NewJDialog(cls[j]);
-                id1.setVisible(true);
-                obj[j] = id1.getObject();
-            }
-        }
-
-        return obj;
-    }
-    
-    private File[] getMatchingFiles(File parent, final String extension) 
-    {
-        return parent.listFiles(new FileFilter()
-        {
-
-            public boolean accept(File dir)
-            {
-                String name = dir.getName();
-                return name.endsWith(extension);
-            }
-        });
-    }
-    public static Class chooser(File f, Class c, String str1,
+    public Class chooser(File f, Class c, String str1,
                                 String str2, String str3, int index) throws MalformedURLException, ClassNotFoundException
     {
         while (c == null)
         {
-            URL url;
             URLClassLoader ucl;
             if (index == 0)
             {
@@ -515,56 +438,87 @@ public class GUI_Coverage_Tool extends javax.swing.JFrame {
 
     public void getJfc()
     {
-        if (jfc == null)
-        {
-            jfc = new JFileChooser("C://Users//brian//Documents//FALL 2023//SWENG 431");
-            jfc.setFileSelectionMode(2);
-            jfc.setMultiSelectionEnabled(true);
-            jfc.setFileFilter(filter);
-        }
+        jfc.setFileSelectionMode(1);
+        jfc.setFileFilter(filter);
 
-        if (jfc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION)
+        returnVal = this.jfc.showOpenDialog(this);
+        if (returnVal == 0)
         {
-            files = jfc.getSelectedFiles();
-        }
+            this.dir = this.jfc.getSelectedFile();
+            this.files = this.dir.listFiles(myFileNameFilter);
+            DefaultListModel dlm = new DefaultListModel();
 
-        if (files[0].isDirectory())
-        {
-            files = getMatchingFiles(files[0], "class");
+            variablesInitializer();
+
+            for (int i = 0; i < this.files.length; ++i)
+            {
+                dlm.add(i, this.files[i].getName());
+                fileName[i] = this.files[i].getName().split("\\.")[0];
+                parentFileName[i] = this.files[i].getParentFile().getName();
+                grandParentFileName[i] = this.files[i].getParentFile().getParentFile().getName();
+            }
+
+            this.jList1.setModel(dlm);
+
+            try
+            {
+                URL u = this.dir.getParentFile().toURL();
+                this.urls[0] = u;
+                this.ucl = new URLClassLoader(this.urls);
+            } catch (Exception ex)
+            {
+                System.out.println(ex);
+            }
         }
     }
 
     public void variablesInitializer()
     {
-        if (fileName == null)
-            fileName = new String[files.length];
-        if (parentFileName == null)
-            parentFileName = new String[files.length];
-        if (grandParentFileName == null)
-            grandParentFileName = new String[files.length];
-        if (classes == null)
-            classes = new Class[files.length];
+        fileName = new String[files.length];
+        parentFileName = new String[files.length];
+        grandParentFileName = new String[files.length];
+        classes = new Class[files.length];
     }
 
-    public void directoryParser(int index)
+    public void directoryParser(int index) throws MalformedURLException, ClassNotFoundException
     {
         int i = 0;
-        for (File f : files)
+        if (returnVal == 0)
         {
-            fileName[i] = f.getName().split("\\.")[0];
-            parentFileName[i] = f.getParentFile().getName();
-            grandParentFileName[i] = f.getParentFile().getParentFile().getName();
+            for (File f : files)
+            {
+                try
+                {
+                    classes[i] = chooser(files[i], classes[i], fileName[i],
+                            parentFileName[i], grandParentFileName[i], index);
+                } catch (MalformedURLException | ClassNotFoundException e)
+                {
+                    if (classes[i] == null)
+                        throw e;
+                    //System.out.println(e.getMessage());
+                }
 
-            try
-            {
-                classes[i] = chooser(files[i], classes[i], fileName[i],
-                        parentFileName[i], grandParentFileName[i], index);
-            } catch (MalformedURLException | ClassNotFoundException e)
-            {
-                System.out.println(e.getMessage());
+                i++;
+            }
+        }
+    }
+
+    public void updateNumbers() {
+        int idx = this.jList1.getSelectedIndex();
+
+        try {
+            ClassSkeleton cs = new ClassSkeleton(classes[idx]);
+            String[] skelStringArr;
+            if (this.mt != null) {
+                Hashtable ht = this.mt.getHashTable();
+                skelStringArr = cs.getSkeleton(ht);
+            } else {
+                skelStringArr = cs.getSkeleton();
             }
 
-            i++;
+            this.jColHeader.setText(skelStringArr[1] + "\n    ");
+        } catch (Exception var8) {
+            System.out.println(var8);
         }
     }
 }
